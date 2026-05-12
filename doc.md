@@ -1,19 +1,19 @@
-# Project Documentation: NavBot-EG01-C-Firmware
+# 專案說明文件：NavBot-EG01-C-Firmware
 
-## Technical Objective
-This project implements a high-performance control system for the NavBot EG01 quadruped robot using C++/Arduino on the ESP32 platform. The primary goal is to provide a deterministically timed control environment suitable for complex legged locomotion and active stabilization.
+## 技術目標
+本專案在 ESP32 平台上使用 C++/Arduino，為 NavBot EG01 四足機器人實作高性能控制系統。主要目標是提供具有確定性時序的控制環境，適用於複雜的腿部步態運動與主動姿態穩定。
 
-## Performance Requirements
-- **Control Loop Period:** 10ms (100Hz) deterministic execution.
-- **Jitter Tolerance:** < 500µs (achieved via FreeRTOS task prioritization).
-- **Communication Latency:** < 50ms via Asynchronous HTTP server.
-- **IK Computation Time:** < 1ms per leg.
+## 性能需求
+- **控制迴圈週期：** 10ms（100Hz）確定性執行。
+- **抖動容差（Jitter Tolerance）：** < 500µs（透過 FreeRTOS 任務優先級實現）。
+- **通訊延遲：** 透過非同步 HTTP Server < 50ms。
+- **逆運動學計算時間：** 每條腿 < 1ms。
 
-## Key Subsystems
-- **Locomotion Engine:** Implements cycloid-based Trot trajectories and state-machine based Walking gaits.
-- **Inverse Kinematics (IK):** Supports both Series (Standard) and Parallel (Mechanical Linkage) leg topologies with coordinate space transformations.
-- **Attitude & Heading Reference System (AHRS):** 6-axis data fusion via Mahony Filter to estimate robot orientation (Pitch/Roll).
-- **Active Stabilizer:** Closed-loop feedback system using IMU data to compensate for terrain unevenness and center-of-mass shifts.
+## 核心子系統
+- **步態引擎（Locomotion Engine）：** 實作基於擺線（Cycloid）的小跑（Trot）軌跡與狀態機式行走（Walking）步態。
+- **逆運動學（IK）：** 支援串聯（標準）與並聯（機械連桿）兩種腿部拓撲，並包含座標空間變換。
+- **姿態與航向參考系統（AHRS）：** 透過 Mahony 濾波器進行 6 軸感測器資料融合，估算機器人姿態（Pitch/Roll）。
+- **主動穩定器（Active Stabilizer）：** 使用 IMU 資料的閉迴路回授系統，用於補償地形不平整與重心偏移。
 
-## Deployment Strategy
-The firmware is designed as a standalone binary. All web assets (HTML/JS/CSS) are embedded as `PROGMEM` constants, eliminating dependencies on external filesystem partitions (SPIFFS/LittleFS) and ensuring robust startup behavior.
+## 部署策略
+韌體設計為獨立二進位檔。所有 Web 資源（HTML/JS/CSS）均以 `PROGMEM` 常數形式嵌入，消除對外部檔案系統分區（SPIFFS/LittleFS）的依賴，並確保穩健的啟動行為。

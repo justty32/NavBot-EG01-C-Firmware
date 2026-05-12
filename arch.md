@@ -1,28 +1,29 @@
-# System Architecture Analysis
+# 系統架構分析
 
-The NavBot EG01 firmware utilizes a multi-threaded architecture leveraging the ESP32's dual-core Xtensa processor.
+NavBot EG01 韌體採用多執行緒架構，充分利用 ESP32 的雙核 Xtensa 處理器。
 
-## Task Allocation
-### Core 1: Real-Time Control (High Priority)
-- **`ControlLoopTask`**: This is the heart of the robot. It runs as a high-priority FreeRTOS task with a strict 10ms period.
-- **Execution Pipeline:** 
-  1. **Sensor Acquisition:** Fetch IMU raw data via I2C (Bus 2).
-  2. **Orientation Estimation:** Update Euler angles (Pitch/Roll).
-  3. **Control Logic:** Compute gait phase, apply attitude compensation, and calculate IK.
-  4. **Actuator Output:** Update PCA9685 PWM channels via I2C (Bus 1).
+## 任務分配
 
-### Core 0: Asynchronous Communication (Low Priority)
-- **`ESPAsyncWebServer`**: Handles incoming HTTP requests for remote control and calibration.
-- **Mechanism**: The web server updates global state variables (`spd`, `L`, `R`, `H_goal`). The `ControlLoopTask` reads these variables at the start of every tick, ensuring a decoupled but responsive interface.
+### Core 1：即時控制（高優先級）
+- **`ControlLoopTask`**：機器人的核心。以高優先級 FreeRTOS 任務執行，週期嚴格鎖定在 10ms。
+- **執行流水線：**
+  1. **感測器擷取：** 透過 I2C（Bus 2）讀取 IMU 原始資料。
+  2. **姿態估算：** 更新歐拉角（Pitch/Roll）。
+  3. **控制邏輯：** 計算步態相位、施加姿態補償並執行逆運動學計算。
+  4. **致動器輸出：** 透過 I2C（Bus 1）更新 PCA9685 PWM 通道。
 
-## System Block Diagram
+### Core 0：非同步通訊（低優先級）
+- **`ESPAsyncWebServer`**：處理遠端控制與校準的傳入 HTTP 請求。
+- **機制：** Web Server 更新全域狀態變數（`spd`、`L`、`R`、`H_goal`），`ControlLoopTask` 在每個 tick 開始時讀取這些變數，實現解耦但即時響應的控制介面。
+
+## 系統方塊圖
 ```text
-[ WiFi AP / Web UI ] <--- (Core 0: Asynchrous) ---> [ Global State ]
-                                                        |
-                                                        V
-[ MPU6050 IMU ] <--- (I2C Bus 2) --- [ Control Loop (Core 1: 100Hz) ] --- (I2C Bus 1) ---> [ PCA9685 Servos ]
+[ WiFi AP / Web UI ] <--- (Core 0：非同步) ---> [ 全域狀態 ]
+                                                     |
+                                                     V
+[ MPU6050 IMU ] <--- (I2C Bus 2) --- [ 控制迴圈 (Core 1: 100Hz) ] --- (I2C Bus 1) ---> [ PCA9685 舵機 ]
 ```
 
-## Concurrency and Safety
-- **Non-blocking I/O**: The use of `ESPAsyncWebServer` prevents network latency from stalling the locomotion engine.
-- **Memory Safety**: Static memory allocation is prioritized over dynamic allocation (Heap) to prevent fragmentation during long-term operation.
+## 並發安全性
+- **非阻塞式 I/O：** 使用 `ESPAsyncWebServer` 可防止網路延遲阻塞步態引擎。
+- **記憶體安全：** 優先採用靜態記憶體分配而非動態堆積分配（Heap），以防止長時間運行時發生記憶體碎片化。

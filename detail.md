@@ -1,25 +1,25 @@
-# Implementation Details: Locomotion & Kinematics
+# 實作細節：步態運動與運動學
 
-## 1. Inverse Kinematics (IK) Engine
-The system supports two mechanical leg configurations selectable via `Config.h`:
-- **Series Topology:** Standard 2-DOF serial linkage calculation.
-- **Parallel Topology:** Accounts for the parallel linkage geometry where the shank servo affects the thigh angle through mechanical coupling. The implementation uses a coordinate shift to normalize the input for the core trigonometric solver.
-- **Safety Clamping:** All inputs to `acos()` are clamped to `[-1.0, 1.0]` using `fmaxf` and `fminf` to prevent `NaN` results from reaching the servo drivers.
+## 1. 逆運動學（IK）引擎
+系統支援兩種腿部機構構型，可透過 `Config.h` 選擇：
+- **串聯拓撲（Series Topology）：** 標準 2-DOF 串聯連桿計算。
+- **並聯拓撲（Parallel Topology）：** 考慮到並聯連桿幾何結構，其中小腿舵機透過機械耦合影響大腿角度。實作中使用座標偏移來正規化核心三角函數求解器的輸入。
+- **安全限位：** 所有傳入 `acos()` 的輸入值均透過 `fmaxf` 和 `fminf` 限制在 `[-1.0, 1.0]` 範圍內，防止 `NaN` 值傳遞至舵機驅動器。
 
-## 2. Attitude Control Strategy
-The robot maintains its body orientation through a 3D Rotation Matrix implementation in `AttitudeControl.cpp`.
-- **Coordinate Frame:** 
-  - +X: Forward
-  - +Y: Left
-  - +Z: Upward (Vertical)
-- **Mirroring:** Rear legs (Leg 3 and 4) use mirrored rotation logic to ensure that a positive Roll command tilts the body correctly while maintaining foot contact points.
+## 2. 姿態控制策略
+機器人透過 `AttitudeControl.cpp` 中的 3D 旋轉矩陣實作來維持機身姿態。
+- **座標系定義：**
+  - +X：前方
+  - +Y：左方
+  - +Z：正上方（垂直）
+- **鏡像處理：** 後腿（腿 3 和腿 4）使用鏡像旋轉邏輯，確保正向 Roll 指令能正確傾斜機身同時維持足部接地點。
 
-## 3. Stabilization Algorithm
-The `Stabilizer` class implements a PD-like feedback loop:
-- **Inputs:** Current Euler angles (Pitch/Roll) vs. Target angles.
-- **Filtering:** Raw IMU data is processed through a moving average filter (Moving Window) to remove high-frequency noise from servo vibration.
-- **Axis Decoupling:** Due to physical IMU orientation, the Pitch correction is driven by Roll error and vice versa to align with the robot's primary axes.
+## 3. 穩定化演算法
+`Stabilizer` 類別實作類 PD 控制的閉迴路回授：
+- **輸入：** 當前歐拉角（Pitch/Roll）與目標角度的偏差。
+- **濾波：** IMU 原始資料經過移動平均濾波器（Moving Window）處理，以消除舵機振動產生的高頻雜訊。
+- **軸解耦：** 由於 IMU 的實際安裝方向，Pitch 補償由 Roll 誤差驅動，Roll 補償由 Pitch 誤差驅動，以對齊機器人的主軸方向。
 
-## 4. Servo Mapping & Calibration
-- **PCA9685 Interface:** Servos are mapped to channels 4 through 11.
-- **Calibration (init_case):** A special mode in the web UI allows locking all servos at 90.0 degrees for mechanical alignment and center-point calibration.
+## 4. 舵機映射與校準
+- **PCA9685 介面：** 舵機映射至通道 4 至 11。
+- **校準模式（init_case）：** Web UI 中提供一個特殊模式，可將所有舵機鎖定在 90.0 度，用於機械組裝對位與中立點校準。

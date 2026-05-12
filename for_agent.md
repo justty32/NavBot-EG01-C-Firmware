@@ -1,26 +1,26 @@
-# Technical Manifest for AI Agents (System Maintenance)
+# AI Agent 技術規範（系統維護用）
 
-This document defines the strict operational boundaries for any AI Agent tasked with modifying or extending this firmware.
+本文件定義任何負責修改或擴充本韌體的 AI Agent 之嚴格操作邊界。
 
-## 1. Architectural Mandates
-- **Core Affinity:** The `ControlLoopTask` MUST remain pinned to Core 1. It must never contain blocking calls (`delay`, `while(1)`) that lack an escape or task yield.
-- **I2C Separation:** 
-  - Bus 1 (Pins 19/23): Dedicated to high-speed PCA9685 output.
-  - Bus 2 (Pins 32/33): Dedicated to MPU6050 IMU input.
-  Do not merge these buses without validating the timing impact on the 100Hz loop.
+## 1. 架構強制規範
+- **核心綁定（Core Affinity）：** `ControlLoopTask` 必須鎖定在 Core 1。任何阻塞式呼叫（`delay`、`while(1)`）若缺乏逃出條件或任務讓出（task yield），均禁止放入此任務。
+- **I2C 分離：**
+  - Bus 1（腳位 19/23）：專用於高速 PCA9685 輸出。
+  - Bus 2（腳位 32/33）：專用於 MPU6050 IMU 輸入。
+  在驗證對 100Hz 迴圈的時序影響之前，禁止合併這兩條匯流排。
 
-## 2. Locomotion Logic
-- **Coordinate System:** Legs are numbered 1 (FL), 2 (FR), 3 (RL), 4 (RR).
-- **Leg 3/4 Mirroring:** In `AttitudeControl`, Leg 3 uses AB4 logic and Leg 4 uses AB3 logic. This is an intentional physical mapping to accommodate the robot's rear-end symmetry. DO NOT CHANGE this mapping without verifying mechanical layout.
+## 2. 步態運動邏輯
+- **座標系：** 腿部編號為 1（左前，FL）、2（右前，FR）、3（左後，RL）、4（右後，RR）。
+- **腿 3/4 鏡像映射：** 在 `AttitudeControl` 中，腿 3 使用 AB4 邏輯，腿 4 使用 AB3 邏輯。這是為了配合機器人後端對稱結構的刻意實體映射。**在未確認機械佈局之前，禁止更改此映射。**
 
-## 3. Web Service
-- **PROGMEM Assets:** All HTML content is stored in `WebResources.h`. To update the UI, modify the raw string literals in this header. Do not implement file-system based serving (LittleFS) as it increases task latency.
+## 3. Web 服務
+- **PROGMEM 資源：** 所有 HTML 內容存放於 `WebResources.h`。更新 UI 時，請修改此標頭檔中的原始字串常數（raw string literals）。禁止改為基於檔案系統的服務方式（LittleFS），因為這會增加任務延遲。
 
-## 4. Safety Guardrails
-- **IK Clamping:** Every calculation in `Kinematics::calculateIK` must have boundary protection. Quadruped movements frequently reach the limits of leg extension; `NaN` propagation will cause the ESP32 to trigger a crash or produce erratic servo behavior.
+## 4. 安全防護
+- **IK 限位保護：** `Kinematics::calculateIK` 中的每一項計算都必須具備邊界保護。四足機器人的動作頻繁到達腿部伸展極限；`NaN` 值的傳播會導致 ESP32 觸發崩潰或舵機產生不受控行為。
 
-## Hardware Reference
-- **SDA1/SCL1:** 19 / 23 (Servos)
-- **SDA2/SCL2:** 33 / 32 (IMU)
-- **PCA9685 Address:** 0x40
-- **Baud Rate:** 115200 (Serial), 921600 (Upload)
+## 硬體參考
+- **SDA1/SCL1：** 19 / 23（舵機）
+- **SDA2/SCL2：** 33 / 32（IMU）
+- **PCA9685 位址：** 0x40
+- **Baud Rate：** 115200（Serial 序列埠），921600（Upload 燒錄）
