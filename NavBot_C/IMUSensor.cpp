@@ -1,13 +1,13 @@
 #include "IMUSensor.h"
 
 bool IMUSensor::init() {
-    Wire.begin(I2C_SDA_IMU, I2C_SCL_IMU);
-    
+    Wire1.begin(I2C_SDA_IMU, I2C_SCL_IMU);
+
     // 喚醒 MPU6050
-    Wire.beginTransmission(MPU6050_ADDR);
-    Wire.write(PWR_MGMT_1);
-    Wire.write(0);
-    if (Wire.endTransmission() != 0) return false;
+    Wire1.beginTransmission(MPU6050_ADDR);
+    Wire1.write(PWR_MGMT_1);
+    Wire1.write(0);
+    if (Wire1.endTransmission() != 0) return false;
 
     // 進行簡單的陀螺儀靜止校準 (300 樣本)
     Serial.println("Calibrating IMU, keep robot still...");
@@ -27,18 +27,18 @@ bool IMUSensor::init() {
 }
 
 void IMUSensor::readRaw(int16_t* acc, int16_t* gyro) {
-    Wire.beginTransmission(MPU6050_ADDR);
-    Wire.write(ACCEL_XOUT_H);
-    Wire.endTransmission(false);
-    Wire.requestFrom(MPU6050_ADDR, (uint8_t)14);
+    Wire1.beginTransmission(MPU6050_ADDR);
+    Wire1.write(ACCEL_XOUT_H);
+    Wire1.endTransmission(false);
+    Wire1.requestFrom(MPU6050_ADDR, (uint8_t)14);
 
-    acc[0] = (Wire.read() << 8) | Wire.read();
-    acc[1] = (Wire.read() << 8) | Wire.read();
-    acc[2] = (Wire.read() << 8) | Wire.read();
-    Wire.read(); Wire.read(); // Skip Temp
-    gyro[0] = (Wire.read() << 8) | Wire.read();
-    gyro[1] = (Wire.read() << 8) | Wire.read();
-    gyro[2] = (Wire.read() << 8) | Wire.read();
+    acc[0] = (Wire1.read() << 8) | Wire1.read();
+    acc[1] = (Wire1.read() << 8) | Wire1.read();
+    acc[2] = (Wire1.read() << 8) | Wire1.read();
+    Wire1.read(); Wire1.read(); // Skip Temp
+    gyro[0] = (Wire1.read() << 8) | Wire1.read();
+    gyro[1] = (Wire1.read() << 8) | Wire1.read();
+    gyro[2] = (Wire1.read() << 8) | Wire1.read();
 }
 
 void IMUSensor::mahonyUpdate(float gx, float gy, float gz, float ax, float ay, float az) {

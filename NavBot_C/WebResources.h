@@ -29,7 +29,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         
         <div class="slider-group">
             <label>速度 (Speed): <span id="spd_val">0</span></label>
-            <input type="range" min="-0.06" max="0.06" step="0.005" value="0" oninput="send('/spd=' + this.value); document.getElementById('spd_val').innerHTML=this.value;">
+            <input type="range" min="-3" max="6" step="0.5" value="0" oninput="send('/spd=' + this.value); document.getElementById('spd_val').innerHTML=this.value;">
         </div>
 
         <div class="slider-group">

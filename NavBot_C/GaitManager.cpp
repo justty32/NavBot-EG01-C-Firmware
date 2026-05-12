@@ -27,30 +27,23 @@ GaitResult GaitManager::calculateTrot(float speed, float h, float L_val, float R
         float zep = h * (1.0 - cos(sigma)) / 2.0;
         float xep_b = (xf - xs) * ((sigma - sin(sigma)) / (2.0 * M_PI)) + xs;
         float xep_z = (xs - xf) * ((sigma - sin(sigma)) / (2.0 * M_PI)) + xf;
-        
-        // 腿1擺動
-        res.x[0] = xep_z * r1; res.y[0] = zep;
-        // 腿3擺動
-        res.x[2] = xep_z * r3; res.y[2] = zep;
-        // 腿2支撐
-        res.x[1] = xep_b * r2; res.y[1] = 0.0;
-        // 腿4支撐
-        res.x[3] = xep_b * r4; res.y[3] = 0.0;
+
+        // 符號對齊 Python PA_TROT: x = -xep * r
+        res.x[0] = -xep_z * r1; res.y[0] = zep;
+        res.x[2] = -xep_z * r3; res.y[2] = zep;
+        res.x[1] = -xep_b * r2; res.y[1] = 0.0;
+        res.x[3] = -xep_b * r4; res.y[3] = 0.0;
     } else {
         // 第二相位: 腿2, 腿4 擺動; 腿1, 腿3 支撐
         float sigma = 2.0 * M_PI * (t - FAAI * TS_CYCLE) / (FAAI * TS_CYCLE);
         float zep = h * (1.0 - cos(sigma)) / 2.0;
         float xep_b = (xf - xs) * ((sigma - sin(sigma)) / (2.0 * M_PI)) + xs;
         float xep_z = (xs - xf) * ((sigma - sin(sigma)) / (2.0 * M_PI)) + xf;
-        
-        // 腿2擺動
-        res.x[1] = xep_z * r2; res.y[1] = zep;
-        // 腿4擺動
-        res.x[3] = xep_z * r4; res.y[3] = zep;
-        // 腿1支撐
-        res.x[0] = xep_b * r1; res.y[0] = 0.0;
-        // 腿3支撐
-        res.x[2] = xep_b * r3; res.y[2] = 0.0;
+
+        res.x[1] = -xep_z * r2; res.y[1] = zep;
+        res.x[3] = -xep_z * r4; res.y[3] = zep;
+        res.x[0] = -xep_b * r1; res.y[0] = 0.0;
+        res.x[2] = -xep_b * r3; res.y[2] = 0.0;
     }
     
     return res;

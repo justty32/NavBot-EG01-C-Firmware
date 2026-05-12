@@ -66,6 +66,9 @@ void ControlLoopTask(void * pvParameters) {
         Y_current   += (Y_goal - Y_current) * KP_ATTITUDE;
         current_H   += (H_goal - current_H) * KP_HEIGHT;
 
+        PIT_current = constrain(PIT_current, -10.0f, 10.0f);
+        ROL_current = constrain(ROL_current, -10.0f, 10.0f);
+
         // 3. 步態生成
         GaitResult gaitRes;
         if (gait_mode == 0) { // Trot
